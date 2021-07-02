@@ -6446,8 +6446,9 @@ retry:
 		__count_zid_vm_events(ALLOCSTALL, sc->reclaim_idx, 1);
 
 	do {
-		vmpressure_prio(sc->gfp_mask, sc->target_mem_cgroup,
-				sc->priority);
+		if (!sc->proactive)
+			vmpressure_prio(sc->gfp_mask, sc->target_mem_cgroup,
+					sc->priority, sc->order);
 		sc->nr_scanned = 0;
 		shrink_zones(zonelist, sc);
 
