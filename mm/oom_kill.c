@@ -1198,6 +1198,7 @@ void pagefault_out_of_memory(void)
 		pr_warn("Huh VM_FAULT_OOM leaked out to the #PF handler. Retrying PF\n");
 }
 
+#ifndef CONFIG_ANDROID_SIMPLE_LMK
 SYSCALL_DEFINE2(process_mrelease, int, pidfd, unsigned int, flags)
 {
 #ifdef CONFIG_MMU
@@ -1276,19 +1277,4 @@ put_pid:
 	return -ENOSYS;
 #endif /* CONFIG_MMU */
 }
-
-void add_to_oom_reaper(struct task_struct *p)
-{
-	p = find_lock_task_mm(p);
-	if (!p)
-		return;
-	if (task_will_free_mem(p)) {
-		__mark_oom_victim(p);
-		if (!test_and_set_bit(MMF_OOM_REAP_QUEUED,
-				     &p->signal->oom_mm->flags)) {
-			get_task_struct(p);
-			__wake_oom_reaper(p);
-		}
-	}
-	task_unlock(p);
-}
+#endif
